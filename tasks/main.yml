@@ -16,3 +16,18 @@
     pkg: "ros-{{ ros_release }}-{{ ros_package }}"
     state: present
   become: true
+
+- name: ROSdep Init
+  shell: 'rosdep init'
+  become: true
+  ignore_errors: yes
+
+- name: ROSdep Update
+  shell: 'rosdep update'
+
+- name: Source ROS
+  lineinfile:
+    path: "~/.bashrc"
+    line: "source /opt/ros/{{ ros_release }}/setup.bash"
+    state: present
+    create: true

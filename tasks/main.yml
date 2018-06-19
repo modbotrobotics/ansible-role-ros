@@ -20,7 +20,8 @@
 - name: ROSdep Init
   shell: 'rosdep init'
   become: true
-  ignore_errors: yes
+  register: command_result
+  failed_when: "'command not found' in command_result.stderr"
 
 - name: ROSdep Update
   shell: 'rosdep update'

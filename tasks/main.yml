@@ -32,3 +32,5 @@
     line: "source /opt/ros/{{ ros_release }}/setup.bash"
     state: present
     create: true
+  become: true
+  become_user: "{{ username }}"

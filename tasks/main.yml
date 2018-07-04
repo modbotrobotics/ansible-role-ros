@@ -1,51 +1,8 @@
 ---
 - name: ROS Installation Status
-  shell: 'rosversion -d'
-  register: ros_status
-  failed_when: 'FAILED' in ros_status.stderr
+  stat:
+    path: "/opt/ros/{{ ros_release }}"
+  register: ros_dir
 
-- name: Add ROS Repository Apt-Key
-  apt_key:
-    url: "{{ ros_apt_key }}"
-    state: present
-  become: true
-  when:
-    - ros_release not in ros_status.stdout
-
-- name: Add ROS Repository
-  apt_repository:
-    repo: "deb {{ ros_apt_uri }} {{ ansible_lsb.codename }} main"
-    state: present
-  become: true
-  when:
-    - ros_release not in ros_status.stdout
-
-- name: Install ROS Package
-  apt:
-    pkg: "ros-{{ ros_release }}-{{ ros_package }}"
-    state: present
-  become: true
-  when:
-    - ros_release not in ros_status.stdout
-
-- name: ROSdep Init
-  shell: 'rosdep init'
-  become: true
-  register: command_result
-  failed_when: "'command {{ ros_release }}' in command_result.stdout"
-
-- name: ROSdep Update
-  shell: 'rosdep update'
-  when:
-    - ros_release not in ros_status.stdout
-
-- name: Source ROS
-  lineinfile:
-    path: "~/.bashrc"
-    line: "source /opt/ros/{{ ros_release }}/setup.bash"
-    state: present
-    create: true
-  become: true
-  become_user: "{{ username }}"
-  when:
-    - ros_release not in ros_status.stdout
+- include: ros.yml
+  when: not ros_dir.stat.exists

@@ -1,0 +1,36 @@
+---
+- name: Add ROS Repository Apt-Key
+  apt_key:
+    url: "{{ ros_apt_key }}"
+    state: present
+  become: true
+
+- name: Add ROS Repository
+  apt_repository:
+    repo: "deb {{ ros_apt_uri }} {{ ansible_lsb.codename }} main"
+    state: present
+  become: true
+
+- name: Install ROS Base Package
+  apt:
+    pkg: "ros-{{ ros_release }}-{{ ros_package }}"
+    state: present
+  become: true
+
+- name: ROSdep Init
+  shell: 'rosdep init'
+  become: true
+  register: command_result
+  failed_when: "'not found' in command_result.stderr"
+
+- name: ROSdep Update
+  shell: 'rosdep update'
+
+- name: Source ROS
+  lineinfile:
+    path: "~/.bashrc"
+    line: "source /opt/ros/{{ ros_release }}/setup.bash"
+    state: present
+    create: true
+  become: true
+  become_user: "{{ username }}"
